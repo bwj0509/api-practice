@@ -1,4 +1,5 @@
-import { useReducer, useEffect } from 'react';
+import React, { useEffect, useReducer } from 'react';
+
 
 function reducer(state, action) {
     switch (action.type) {
@@ -21,35 +22,37 @@ function reducer(state, action) {
                 error: action.error
             };
         default:
-            throw new Error(`Unhandled action type: ${action.type}`);
+            throw new Error(`Unhandled action type:${action.type}`)
     }
 }
 
-function useAsync(callback, deps = [], skip = false) {
-    const [state, dispatch] = useReducer(reducer, {
-        loading: false,
-        data: null,
-        error: false
-    });
+const initialstate = {
+    loading: false,
+    data: null,
+    error: false
+}
 
-    const fetchData = async () => {
+
+function useAsync(callback, deps = []) {
+    const [state, dispatch] = useReducer(reducer, initialstate)
+
+    const fetchDate = async () => {
         dispatch({ type: 'LOADING' });
         try {
             const data = await callback();
-            dispatch({ type: 'SUCCESS', data });
-        } catch (e) {
-            dispatch({ type: 'ERROR', error: e });
+            dispatch({ type: 'SUCCESS', data })
         }
-    };
+        catch (e) {
+            dispatch({ type: 'ERROR', error: e })
+        }
+    }
 
     useEffect(() => {
-        if (skip) return;
-        fetchData();
-        // eslint 설정을 다음 줄에서만 비활성화
-        // eslint-disable-next-line
-    }, deps);
+        fetchDate();
+    }, deps)
 
-    return [state, fetchData];
+    return [state, fetchDate];
+
 }
 
 export default useAsync;
